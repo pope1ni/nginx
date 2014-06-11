@@ -318,6 +318,12 @@ ngx_http_dav_delete_handler(ngx_http_request_t *r)
         return NGX_HTTP_UNSUPPORTED_MEDIA_TYPE;
     }
 
+    if (ngx_strchr(r->request_line.data, '#')) {
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                      "DELETE with fragment is unsafe");
+        return NGX_HTTP_BAD_REQUEST;
+    }
+
     dlcf = ngx_http_get_module_loc_conf(r, ngx_http_dav_module);
 
     if (dlcf->min_delete_depth) {
