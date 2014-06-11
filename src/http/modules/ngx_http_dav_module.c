@@ -854,7 +854,7 @@ overwrite_done:
         cf.log = r->connection->log;
 
         if (ngx_copy_file(path.data, copy.path.data, &cf) == NGX_OK) {
-            return NGX_HTTP_NO_CONTENT;
+            return overwrite ? NGX_HTTP_NO_CONTENT : NGX_HTTP_CREATED;
         }
     }
 
