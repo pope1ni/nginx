@@ -841,7 +841,7 @@ overwrite_done:
             ext.log = r->connection->log;
 
             if (ngx_ext_rename_file(&path, &copy.path, &ext) == NGX_OK) {
-                return NGX_HTTP_NO_CONTENT;
+                return overwrite ? NGX_HTTP_NO_CONTENT : NGX_HTTP_CREATED;
             }
 
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
