@@ -834,21 +834,22 @@ overwrite_done:
                 return overwrite ? NGX_HTTP_NO_CONTENT : NGX_HTTP_CREATED;
             }
 
-            return NGX_HTTP_INTERNAL_SERVER_ERROR;
-        }
+        } else {
 
-        cf.size = ngx_file_size(&fi);
-        cf.buf_size = 0;
-        cf.access = ngx_file_access(&fi);
-        cf.time = ngx_file_mtime(&fi);
-        cf.log = r->connection->log;
+            cf.size = ngx_file_size(&fi);
+            cf.buf_size = 0;
+            cf.access = ngx_file_access(&fi);
+            cf.time = ngx_file_mtime(&fi);
+            cf.log = r->connection->log;
 
-        if (ngx_copy_file(path.data, copy.path.data, &cf) == NGX_OK) {
-            return overwrite ? NGX_HTTP_NO_CONTENT : NGX_HTTP_CREATED;
+            if (ngx_copy_file(path.data, copy.path.data, &cf) == NGX_OK) {
+                return overwrite ? NGX_HTTP_NO_CONTENT : NGX_HTTP_CREATED;
+            }
+
         }
     }
 
-    return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    return NGX_HTTP_CONFLICT;
 }
 
 
