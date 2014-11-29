@@ -53,6 +53,8 @@ static ngx_int_t ngx_http_dav_copy_dir_time(ngx_tree_ctx_t *ctx,
 static ngx_int_t ngx_http_dav_copy_tree_file(ngx_tree_ctx_t *ctx,
     ngx_str_t *path);
 
+static ngx_int_t ngx_http_dav_options_handler(ngx_http_request_t *r);
+
 static ngx_int_t ngx_http_dav_depth(ngx_http_request_t *r, ngx_int_t dflt);
 static ngx_int_t ngx_http_dav_error(ngx_log_t *log, ngx_err_t err,
     ngx_int_t not_found, char *failed, u_char *path);
@@ -70,6 +72,7 @@ static ngx_conf_bitmask_t  ngx_http_dav_methods_mask[] = {
     { ngx_string("mkcol"), NGX_HTTP_MKCOL },
     { ngx_string("copy"), NGX_HTTP_COPY },
     { ngx_string("move"), NGX_HTTP_MOVE },
+    { ngx_string("options"), NGX_HTTP_OPTIONS },
     { ngx_null_string, 0 }
 };
 
@@ -196,6 +199,10 @@ ngx_http_dav_handler(ngx_http_request_t *r)
     case NGX_HTTP_MOVE:
 
         return ngx_http_dav_copy_move_handler(r);
+
+    case NGX_HTTP_OPTIONS:
+
+        return ngx_http_dav_options_handler(r);
     }
 
     return NGX_DECLINED;
@@ -989,6 +996,42 @@ ngx_http_dav_copy_tree_file(ngx_tree_ctx_t *ctx, ngx_str_t *path)
     (void) ngx_copy_file(path->data, file, &cf);
 
     ngx_free(file);
+
+    return NGX_OK;
+}
+
+
+static ngx_int_t
+ngx_http_dav_options_handler(ngx_http_request_t *r)
+{
+    ngx_table_elt_t              *h;
+
+    h = ngx_list_push(&r->headers_out.headers);
+
+    if (h == NULL) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+
+    ngx_str_set(&h->key, "DAV");
+    ngx_str_set(&h->value, "1");
+    h->hash = 1;
+
+    h = ngx_list_push(&r->headers_out.headers);
+
+    if (h == NULL) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+
+    /* FIXME: Change to only allow methods configured in dav_methods. */
+    ngx_str_set(&h->key, "Allow");
+    ngx_str_set(&h->value, "GET,HEAD,PUT,DELETE,MKCOL,COPY,MOVE,OPTIONS");
+    h->hash = 1;
+
+    r->headers_out.status = NGX_HTTP_OK;
+    r->header_only = 1;
+    r->headers_out.content_length_n = 0;
+
+    ngx_http_send_header(r);
 
     return NGX_OK;
 }
