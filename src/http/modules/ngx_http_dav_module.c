@@ -763,15 +763,16 @@ overwrite_done:
             return NGX_HTTP_BAD_REQUEST;
         }
 
-        if (overwrite) {
-            ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                           "http delete: \"%s\"", copy.path.data);
+    }
 
-            rc = ngx_http_dav_delete_path(r, &copy.path, dir);
+    if (overwrite) {
+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                       "http delete: \"%s\"", copy.path.data);
 
-            if (rc != NGX_OK) {
-                return rc;
-            }
+        rc = ngx_http_dav_delete_path(r, &copy.path, dir);
+
+        if (rc != NGX_OK) {
+            return rc;
         }
     }
 
