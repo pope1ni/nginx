@@ -1012,8 +1012,9 @@ ngx_http_dav_options_handler(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
+    /* FIXME: Only advertise Class 2 support if LOCK and UNLOCK in dav_methods. */
     ngx_str_set(&h->key, "DAV");
-    ngx_str_set(&h->value, "1");
+    ngx_str_set(&h->value, "1,2,3");
     h->hash = 1;
 
     h = ngx_list_push(&r->headers_out.headers);
